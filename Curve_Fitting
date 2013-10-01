@@ -1,0 +1,144 @@
+{
+ "metadata": {
+  "name": "340FittingDataCurveFit"
+ },
+ "nbformat": 3,
+ "nbformat_minor": 0,
+ "worksheets": [
+  {
+   "cells": [
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "# 340-Plotting and Fitting Data\n",
+      "This is the same set of data and fitting function as in the \"Intro to Matlab\" document.\n",
+      "\n",
+      "## Data and error bars"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": true,
+     "input": [
+      "# mathematical routines are expecting 'array'\n",
+      "x = array([-10, -9, -8, -7, -6, -5, -4, -3, 0]);\n",
+      "y = array([2.65, 2.10, 1.90, 1.40, 1.00, 0.80, 0.60, 0.30, 0.00]);\n",
+      "ey = array([0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.05, 0.2]);\n",
+      "# Plot the data with error bars\t\t\n",
+      "errorbar(x,y,ey,linestyle = '',marker = 'o') # no connecting line, circle\n",
+      "# Don\u2019t forget axes labels\n",
+      "xlabel('x (mm)')\n",
+      "ylabel('y (mm)')\n",
+      "axis([-12,0.5,-0.5,3])\n",
+      "grid(True)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "## Fitting function to the data\n",
+      "\n",
+      "For physical reasons we expect our data is described by a circle.  \n",
+      "The equation of a circle with radius $a$ centered at $(x,y)=(b,c)$ is given by\n",
+      "$$(x-b)^2+(y-c)^2 = a^2$$\n",
+      "Let's rewrite this in terms of $y$,\n",
+      "$$y=-\\sqrt{a^2-(x-b)^2}+c$$\n",
+      "We define the function and then want to find the best estimates for $a, b, c$ consistent with our data."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": true,
+     "input": [
+      "def myfun(x,a,b,c):\n",
+      "    ans = -sqrt(a**2-(x-b)**2)+c  # this is y, \"the function to be fit\"\n",
+      "    return ans"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Here are the initial guesses for the parameters $a$, $b$, and $c$ to pass to the fitting function."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "p0 = [15, 0, 15]"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "The 'curve_fit' function gets the best y by adjusting the parameters 'p'."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "from scipy.optimize import curve_fit  # import the curve fitting function\n",
+      "plsq, pcov = curve_fit(myfun, x, y, p0, ey)  # curve fit returns p and covariance matrix\n",
+      "# these give the parameters and the uncertainties\n",
+      "print('a = %.3f +/- %.3f' % (plsq[0], sqrt(pcov[0,0])))\n",
+      "print('b = %.3f +/- %.3f' % (plsq[1], sqrt(pcov[1,1])))\n",
+      "print('c = %.3f +/- %.3f' % (plsq[2], sqrt(pcov[2,2])))"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Now we use the fitted parameters in our function to compare with the data."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "xlots = linspace(-11,0.5)  # need lots of data points for smooth curve\n",
+      "yfit = myfun(xlots,plsq[0],plsq[1],plsq[2])  # use fit results for a, b, c"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "errorbar(x,y,ey,linestyle = '',marker = 'o')\n",
+      "xlabel('x (mm)')\n",
+      "ylabel('y (mm)')\n",
+      "plot(xlots,yfit)\n",
+      "title('Least-squares fit to data')\n",
+      "legend(['data','Fit'])\n",
+      "axis([-12,0.5,-0.5,3])\n",
+      "grid(True)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    }
+   ],
+   "metadata": {}
+  }
+ ]
+}
